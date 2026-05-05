@@ -3,6 +3,7 @@ from flask import (
     url_for, session, flash, jsonify
 )
 from datetime import datetime, timedelta
+import os
 import requests as http_requests
 
 from config import SECRET_KEY, ADMIN_PASSWORD, LINE_NOTIFY_TOKEN, SUBMIT_COOLDOWN_SECONDS
@@ -406,4 +407,5 @@ def api_suggest_buy():
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=False, host="0.0.0.0", port=port)
