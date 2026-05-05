@@ -19,7 +19,7 @@
       {% if session.get('is_admin') %}
         <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
         <a href="{{ url_for('admin_ingredients') }}">วัตถุดิบ</a>
-        <a href="{{ url_for('staff_index') }}">หน้าพนักงาน</a>
+        <a href="{{ url_for('staff_index') }}">นับสต๊อก</a>
         <a href="{{ url_for('admin_logout') }}" class="btn-logout">ออกจากระบบ</a>
       {% else %}
         <a href="{{ url_for('admin_login') }}" class="btn-admin-link">Admin</a>
