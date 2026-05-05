@@ -13,29 +13,57 @@
     <span class="card-icon">➕</span>
     <h2>เพิ่มวัตถุดิบใหม่</h2>
   </div>
-  <form method="POST" action="{{ url_for('admin_ingredient_add') }}" class="ing-form">
-    <div class="form-grid">
-      <div class="field-group">
-        <label>ชื่อภาษาไทย <span class="required">*</span></label>
-        <input type="text" name="name_th" class="form-input" placeholder="เช่น หมู" required>
+
+  <form method="POST" action="{{ url_for('admin_ingredient_add') }}" class="add-form">
+
+    <div class="add-row">
+      <!-- ชื่อไทย -->
+      <div class="add-field add-field-wide">
+        <label class="add-label">
+          ชื่อวัตถุดิบ (ภาษาไทย) <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          name="name_th"
+          class="add-input"
+          placeholder="เช่น หมู, ไก่, กะทิ"
+          required
+          autofocus
+        >
       </div>
-      <div class="field-group">
-        <label>ชื่อภาษาอังกฤษ <span class="required">*</span></label>
-        <input type="text" name="name_en" class="form-input" placeholder="e.g. Pork" required>
+
+      <!-- ชื่ออังกฤษ -->
+      <div class="add-field add-field-wide">
+        <label class="add-label">
+          ชื่อวัตถุดิบ (ภาษาอังกฤษ) <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          name="name_en"
+          class="add-input"
+          placeholder="e.g. Pork, Chicken, Coconut Milk"
+          required
+        >
       </div>
-      <div class="field-group">
-        <label>หมวดหมู่ <span class="required">*</span></label>
-        <select name="category_id" class="form-input" required>
+    </div>
+
+    <div class="add-row">
+      <!-- หมวดหมู่ -->
+      <div class="add-field">
+        <label class="add-label">หมวดหมู่ <span class="required">*</span></label>
+        <select name="category_id" class="add-input" required>
           {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.name_th }} ({{ cat.name_en }})</option>
+            <option value="{{ cat.id }}">{{ cat.name_th }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="field-group">
-        <label>หน่วย <span class="required">*</span></label>
-        <select name="unit" class="form-input">
-          <option value="kg">kg</option>
-          <option value="g">g</option>
+
+      <!-- หน่วย -->
+      <div class="add-field">
+        <label class="add-label">หน่วยที่ใช้ <span class="required">*</span></label>
+        <select name="unit" class="add-input">
+          <option value="kg">kg (กิโลกรัม)</option>
+          <option value="g">g (กรัม)</option>
           <option value="ลิตร">ลิตร</option>
           <option value="ชิ้น">ชิ้น</option>
           <option value="กล่อง">กล่อง</option>
@@ -43,16 +71,52 @@
           <option value="ขวด">ขวด</option>
         </select>
       </div>
-      <div class="field-group">
-        <label>Par Level (เป้าหมายสต๊อก) <span class="required">*</span></label>
-        <input type="number" name="par_level" class="form-input" placeholder="50" min="0" step="0.5" required>
+
+      <!-- Par Level -->
+      <div class="add-field">
+        <label class="add-label">
+          สต๊อกเป้าหมาย (Par)
+          <span class="add-hint">ควรมีในร้านเท่าไหร่</span>
+        </label>
+        <input
+          type="number"
+          name="par_level"
+          class="add-input"
+          placeholder="เช่น 50"
+          min="0"
+          step="0.5"
+          required
+        >
       </div>
-      <div class="field-group">
-        <label>ขั้นต่ำ (แจ้งเตือน) <span class="required">*</span></label>
-        <input type="number" name="min_level" class="form-input" placeholder="20" min="0" step="0.5" required>
+
+      <!-- Min Level -->
+      <div class="add-field">
+        <label class="add-label">
+          ขั้นต่ำ (แจ้งเตือน)
+          <span class="add-hint">ถ้าต่ำกว่านี้ให้แจ้งเตือน</span>
+        </label>
+        <input
+          type="number"
+          name="min_level"
+          class="add-input"
+          placeholder="เช่น 20"
+          min="0"
+          step="0.5"
+          required
+        >
       </div>
     </div>
-    <button type="submit" class="btn-submit btn-compact">+ เพิ่มวัตถุดิบ</button>
+
+    <div class="add-footer">
+      <div class="add-tip">
+        💡 <strong>Par Level</strong> = สต๊อกที่ต้องการมีในร้าน &nbsp;|&nbsp;
+        <strong>ขั้นต่ำ</strong> = ถ้าสต๊อกเหลือน้อยกว่านี้จะแจ้งเตือนทันที
+      </div>
+      <button type="submit" class="btn-add-submit">
+        ➕ เพิ่มวัตถุดิบ
+      </button>
+    </div>
+
   </form>
 </section>
 
@@ -60,23 +124,24 @@
 <section class="card">
   <div class="card-header">
     <span class="card-icon">📦</span>
-    <h2>รายการวัตถุดิบ ({{ ingredients|length }} รายการ)</h2>
+    <h2>รายการวัตถุดิบทั้งหมด</h2>
+    <span class="badge badge-gray">{{ ingredients|length }} รายการ</span>
   </div>
   <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
-          <th>วัตถุดิบ</th>
+          <th>ชื่อวัตถุดิบ</th>
           <th>หมวด</th>
           <th>หน่วย</th>
-          <th>Par Level</th>
+          <th>Par (เป้าหมาย)</th>
           <th>ขั้นต่ำ</th>
           <th>จัดการ</th>
         </tr>
       </thead>
       <tbody>
         {% for ing in ingredients %}
-        <tr id="row-edit-{{ ing.id }}">
+        <tr>
           <td>
             <strong>{{ ing.name_th }}</strong><br>
             <small class="text-gray">{{ ing.name_en }}</small>
@@ -86,13 +151,30 @@
           <td>{{ ing.par_level }}</td>
           <td>{{ ing.min_level }}</td>
           <td class="td-actions">
-            <button class="btn-sm btn-blue" onclick="openEditModal({{ ing.id }}, '{{ ing.name_th }}', '{{ ing.name_en }}', {{ ing.category_id }}, '{{ ing.unit }}', {{ ing.par_level }}, {{ ing.min_level }})">แก้ไข</button>
+            <button class="btn-sm btn-blue"
+              onclick="openEditModal(
+                {{ ing.id }},
+                '{{ ing.name_th|replace("'", "\\'") }}',
+                '{{ ing.name_en|replace("'", "\\'") }}',
+                {{ ing.category_id }},
+                '{{ ing.unit }}',
+                {{ ing.par_level }},
+                {{ ing.min_level }}
+              )">✏️ แก้ไข</button>
             <form method="POST" action="{{ url_for('admin_ingredient_delete', ing_id=ing.id) }}" style="display:inline">
-              <button type="submit" class="btn-sm btn-red" onclick="return confirm('ลบ {{ ing.name_th }}?')">ลบ</button>
+              <button type="submit" class="btn-sm btn-red"
+                onclick="return confirm('ลบ {{ ing.name_th }} ออกจากระบบ?')">🗑 ลบ</button>
             </form>
           </td>
         </tr>
         {% endfor %}
+        {% if not ingredients %}
+        <tr>
+          <td colspan="6" class="text-center text-gray" style="padding:2rem">
+            ยังไม่มีวัตถุดิบ — เพิ่มด้านบนได้เลยครับ
+          </td>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
@@ -102,31 +184,34 @@
 <div id="edit-modal" class="modal-overlay" style="display:none" onclick="closeModal(event)">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>แก้ไขวัตถุดิบ</h3>
+      <h3>✏️ แก้ไขวัตถุดิบ</h3>
       <button class="modal-close" onclick="closeEditModal()">×</button>
     </div>
-    <form method="POST" id="edit-form" class="ing-form">
-      <input type="hidden" name="_method" value="edit">
-      <div class="form-grid">
-        <div class="field-group">
-          <label>ชื่อภาษาไทย</label>
-          <input type="text" name="name_th" id="edit-name-th" class="form-input" required>
+    <form method="POST" id="edit-form" class="add-form" style="padding:1.25rem">
+
+      <div class="add-row">
+        <div class="add-field add-field-wide">
+          <label class="add-label">ชื่อภาษาไทย</label>
+          <input type="text" name="name_th" id="edit-name-th" class="add-input" required>
         </div>
-        <div class="field-group">
-          <label>ชื่อภาษาอังกฤษ</label>
-          <input type="text" name="name_en" id="edit-name-en" class="form-input" required>
+        <div class="add-field add-field-wide">
+          <label class="add-label">ชื่อภาษาอังกฤษ</label>
+          <input type="text" name="name_en" id="edit-name-en" class="add-input" required>
         </div>
-        <div class="field-group">
-          <label>หมวดหมู่</label>
-          <select name="category_id" id="edit-category" class="form-input">
+      </div>
+
+      <div class="add-row">
+        <div class="add-field">
+          <label class="add-label">หมวดหมู่</label>
+          <select name="category_id" id="edit-category" class="add-input">
             {% for cat in categories %}
               <option value="{{ cat.id }}">{{ cat.name_th }}</option>
             {% endfor %}
           </select>
         </div>
-        <div class="field-group">
-          <label>หน่วย</label>
-          <select name="unit" id="edit-unit" class="form-input">
+        <div class="add-field">
+          <label class="add-label">หน่วย</label>
+          <select name="unit" id="edit-unit" class="add-input">
             <option value="kg">kg</option>
             <option value="g">g</option>
             <option value="ลิตร">ลิตร</option>
@@ -136,18 +221,19 @@
             <option value="ขวด">ขวด</option>
           </select>
         </div>
-        <div class="field-group">
-          <label>Par Level</label>
-          <input type="number" name="par_level" id="edit-par" class="form-input" min="0" step="0.5" required>
+        <div class="add-field">
+          <label class="add-label">Par Level (เป้าหมาย)</label>
+          <input type="number" name="par_level" id="edit-par" class="add-input" min="0" step="0.5" required>
         </div>
-        <div class="field-group">
-          <label>ขั้นต่ำ</label>
-          <input type="number" name="min_level" id="edit-min" class="form-input" min="0" step="0.5" required>
+        <div class="add-field">
+          <label class="add-label">ขั้นต่ำ (แจ้งเตือน)</label>
+          <input type="number" name="min_level" id="edit-min" class="add-input" min="0" step="0.5" required>
         </div>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
-        <button type="submit" class="btn-submit btn-compact">บันทึก</button>
+        <button type="submit" class="btn-add-submit">💾 บันทึก</button>
       </div>
     </form>
   </div>
