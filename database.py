@@ -58,7 +58,7 @@ def init_db():
         );
     """)
 
-    # Seed categories if empty
+    # Seed categories only (no sample ingredients)
     existing = c.execute("SELECT COUNT(*) FROM categories").fetchone()[0]
     if existing == 0:
         c.executemany(
@@ -70,26 +70,6 @@ def init_db():
                 ("เส้น/แป้ง", "Noodles & Flour"),
                 ("อื่นๆ", "Others"),
             ],
-        )
-
-        # Seed sample ingredients
-        sample = [
-            ("หมู", "Pork", 1, "kg", 50, 20),
-            ("ไก่", "Chicken", 1, "kg", 40, 15),
-            ("กุ้ง", "Shrimp", 1, "kg", 20, 8),
-            ("กะทิ", "Coconut Milk", 5, "ลิตร", 30, 10),
-            ("พริกแกงข้าวซอย", "Khao Soi Curry Paste", 3, "kg", 10, 3),
-            ("เส้นข้าวซอย", "Khao Soi Noodles", 4, "kg", 20, 8),
-            ("หัวหอม", "Onion", 2, "kg", 15, 5),
-            ("กระเทียม", "Garlic", 2, "kg", 10, 3),
-            ("น้ำมัน", "Oil", 3, "ลิตร", 20, 5),
-            ("น้ำปลา", "Fish Sauce", 3, "ลิตร", 10, 3),
-        ]
-        c.executemany(
-            """INSERT INTO ingredients
-               (name_th, name_en, category_id, unit, par_level, min_level)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            sample,
         )
 
     conn.commit()

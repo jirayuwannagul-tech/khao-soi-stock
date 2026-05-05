@@ -382,6 +382,17 @@ def admin_ingredient_delete(ing_id):
     return redirect(url_for("admin_ingredients"))
 
 
+@app.route("/admin/ingredients/clear-all", methods=["POST"])
+@admin_required
+def admin_ingredients_clear_all():
+    db = get_db()
+    db.execute("UPDATE ingredients SET active=0")
+    db.commit()
+    db.close()
+    flash("ล้างวัตถุดิบทั้งหมดเรียบร้อยแล้ว — เพิ่มรายการใหม่ได้เลย", "success")
+    return redirect(url_for("admin_ingredients"))
+
+
 # ──────────────────────────────────────────────────────────────
 # API – auto-calculate suggested buy (called by JS)
 # ──────────────────────────────────────────────────────────────

@@ -449,7 +449,21 @@ select.add-input { cursor: pointer; }
   align-items: center;
   gap: .75rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
+.btn-clear-all {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  padding: .4rem 1rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-clear-all:hover { background: var(--red); color: white; }
 .ing-list-title {
   font-size: 1.1rem;
   font-weight: 700;

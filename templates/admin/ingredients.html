@@ -124,6 +124,12 @@
 <div class="ing-list-header">
   <h2 class="ing-list-title">📦 รายการวัตถุดิบทั้งหมด</h2>
   <span class="badge badge-gray">{{ ingredients|length }} รายการ</span>
+  {% if ingredients %}
+  <form method="POST" action="{{ url_for('admin_ingredients_clear_all') }}"
+        onsubmit="return confirm('⚠️ ล้างวัตถุดิบทั้งหมด {{ ingredients|length }} รายการ?\nกดตกลงเพื่อยืนยัน')">
+    <button type="submit" class="btn-clear-all">🗑 ล้างทั้งหมด</button>
+  </form>
+  {% endif %}
 </div>
 
 {% for cat_name, ing_group in ingredients|groupby('cat_th') %}
