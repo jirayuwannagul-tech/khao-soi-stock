@@ -120,36 +120,46 @@
   </form>
 </section>
 
-<!-- Ingredient List -->
-<section class="card">
-  <div class="card-header">
-    <span class="card-icon">📦</span>
-    <h2>รายการวัตถุดิบทั้งหมด</h2>
-    <span class="badge badge-gray">{{ ingredients|length }} รายการ</span>
+<!-- Ingredient List grouped by category -->
+<div class="ing-list-header">
+  <h2 class="ing-list-title">📦 รายการวัตถุดิบทั้งหมด</h2>
+  <span class="badge badge-gray">{{ ingredients|length }} รายการ</span>
+</div>
+
+{% for cat_name, ing_group in ingredients|groupby('cat_th') %}
+<section class="card cat-card">
+  <div class="cat-card-header">
+    <span class="cat-icon">
+      {% if 'เนื้อ' in cat_name %}🥩
+      {% elif 'ผัก' in cat_name %}🥬
+      {% elif 'เครื่องปรุง' in cat_name %}🧂
+      {% elif 'เส้น' in cat_name or 'แป้ง' in cat_name %}🍜
+      {% else %}📦{% endif %}
+    </span>
+    <h3 class="cat-card-title">{{ cat_name }}</h3>
+    <span class="badge badge-gray">{{ ing_group|list|length }} รายการ</span>
   </div>
   <div class="table-wrap">
     <table class="data-table">
       <thead>
         <tr>
           <th>ชื่อวัตถุดิบ</th>
-          <th>หมวด</th>
           <th>หน่วย</th>
           <th>Par (เป้าหมาย)</th>
-          <th>ขั้นต่ำ</th>
+          <th>ขั้นต่ำ (แจ้งเตือน)</th>
           <th>จัดการ</th>
         </tr>
       </thead>
       <tbody>
-        {% for ing in ingredients %}
+        {% for ing in ing_group %}
         <tr>
           <td>
             <strong>{{ ing.name_th }}</strong><br>
             <small class="text-gray">{{ ing.name_en }}</small>
           </td>
-          <td>{{ ing.cat_th }}</td>
           <td>{{ ing.unit }}</td>
-          <td>{{ ing.par_level }}</td>
-          <td>{{ ing.min_level }}</td>
+          <td><span class="par-badge">{{ ing.par_level }} {{ ing.unit }}</span></td>
+          <td><span class="min-badge">{{ ing.min_level }} {{ ing.unit }}</span></td>
           <td class="td-actions">
             <button class="btn-sm btn-blue"
               onclick="openEditModal(
@@ -168,17 +178,18 @@
           </td>
         </tr>
         {% endfor %}
-        {% if not ingredients %}
-        <tr>
-          <td colspan="6" class="text-center text-gray" style="padding:2rem">
-            ยังไม่มีวัตถุดิบ — เพิ่มด้านบนได้เลยครับ
-          </td>
-        </tr>
-        {% endif %}
       </tbody>
     </table>
   </div>
 </section>
+{% else %}
+<section class="card">
+  <div class="empty-state">
+    <span class="empty-icon">📭</span>
+    <p>ยังไม่มีวัตถุดิบ — เพิ่มด้านบนได้เลยครับ</p>
+  </div>
+</section>
+{% endfor %}
 
 <!-- Edit Modal -->
 <div id="edit-modal" class="modal-overlay" style="display:none" onclick="closeModal(event)">

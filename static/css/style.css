@@ -443,6 +443,57 @@ select.add-input { cursor: pointer; }
 
 .text-center { text-align: center; }
 
+/* ── Category grouped ingredient list ─────────────────────── */
+.ing-list-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.ing-list-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.cat-card { margin-bottom: 1rem; }
+
+.cat-card-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to right, #fff8f5, var(--white));
+  border-left: 4px solid var(--brand);
+}
+.cat-icon { font-size: 1.3rem; }
+.cat-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 1;
+  color: var(--brand-dark);
+}
+
+.par-badge {
+  display: inline-block;
+  background: #ebf8ff;
+  color: var(--blue);
+  padding: .2rem .6rem;
+  border-radius: 6px;
+  font-size: .85rem;
+  font-weight: 600;
+}
+.min-badge {
+  display: inline-block;
+  background: var(--red-light);
+  color: var(--red);
+  padding: .2rem .6rem;
+  border-radius: 6px;
+  font-size: .85rem;
+  font-weight: 600;
+}
+
 /* ── Data Tables ───────────────────────────────────────────── */
 .table-wrap { overflow-x: auto; }
 .data-table {
