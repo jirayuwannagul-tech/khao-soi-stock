@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Admin Login – ข้าวซอยเสาร์ห้า{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">🍜</div>
+    <h2 class="login-title">Admin Login</h2>
+    <p class="login-sub">ข้าวซอยเสาร์ห้า</p>
+
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="field-group">
+        <label for="password">รหัสผ่าน</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="form-input"
+          placeholder="ใส่รหัสผ่าน"
+          autofocus
+          required
+        >
+      </div>
+      <button type="submit" class="btn-submit">เข้าสู่ระบบ</button>
+    </form>
+
+    <a href="{{ url_for('staff_index') }}" class="back-link">← กลับหน้าพนักงาน</a>
+  </div>
+</div>
+{% endblock %}

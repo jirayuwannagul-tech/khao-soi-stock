@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}คำขอจัดซื้อ #{{ pr.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">คำขอจัดซื้อ #{{ pr.id }}</h1>
+  <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Dashboard</a>
+</div>
+
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">📋</span>
+    <h2>รายละเอียด</h2>
+    <span class="status-badge status-{{ pr.status }}">
+      {% if pr.status == 'pending' %}รอดำเนินการ
+      {% elif pr.status == 'sent' %}ส่ง LINE แล้ว
+      {% elif pr.status == 'merged' %}รวมแล้ว
+      {% elif pr.status == 'done' %}จัดซื้อแล้ว
+      {% else %}{{ pr.status }}{% endif %}
+    </span>
+  </div>
+
+  <div class="info-grid">
+    <div><strong>รายงานโดย:</strong> {{ pr.created_by }}</div>
+    <div><strong>เวลา:</strong> {{ pr.created_at }}</div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>วัตถุดิบ</th>
+          <th>ต้องการซื้อ (คำนวณ)</th>
+          <th>แนะนำซื้อ (พนักงาน)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>
+            <strong>{{ item.name_th }}</strong>
+            <small class="text-gray"> / {{ item.name_en }}</small>
+          </td>
+          <td class="text-orange bold">{{ item.need_qty }} {{ item.unit }}</td>
+          <td>{{ item.suggest_qty }} {{ item.unit }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pr.status != 'done' %}
+  <div style="margin-top: 1.5rem">
+    <form method="POST" action="{{ url_for('admin_purchase_done', req_id=pr.id) }}">
+      <button type="submit" class="btn-submit btn-compact" onclick="return confirm('ยืนยันว่าจัดซื้อแล้ว?')">
+        ✓ ทำเครื่องหมายว่าจัดซื้อแล้ว
+      </button>
+    </form>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

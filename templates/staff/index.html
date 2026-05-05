@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}ตรวจสต๊อก – ข้าวซอยเสาร์ห้า{% endblock %}
+
+{% block content %}
+<div class="staff-header">
+  <h1 class="staff-title">ตรวจสต๊อก</h1>
+  <p class="staff-subtitle">ข้าวซอยเสาร์ห้า</p>
+  <div class="staff-time" id="live-clock"></div>
+</div>
+
+<form method="POST" action="{{ url_for('staff_submit') }}" id="stock-form">
+
+  {% set ns = namespace(current_cat='') %}
+  {% for ing in ingredients %}
+    {% if ing.cat_th != ns.current_cat %}
+      {% if ns.current_cat != '' %}</tbody></table></div>{% endif %}
+      {% set ns.current_cat = ing.cat_th %}
+      <div class="table-section">
+        <div class="category-label">{{ ing.cat_th }}</div>
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>วัตถุดิบ</th>
+              <th>คงเหลือ<br><small>(ประมาณ)</small></th>
+              <th>ต้องซื้อ</th>
+              <th>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+    {% endif %}
+
+    <tr class="ing-row" id="row-{{ ing.id }}"
+        data-par="{{ ing.par_level }}"
+        data-min="{{ ing.min_level }}"
+        data-unit="{{ ing.unit }}">
+      <td class="ing-name">
+        <span class="ing-name-th">{{ ing.name_th }}</span>
+        <span class="ing-name-en">{{ ing.name_en }}</span>
+        <span class="ing-unit">{{ ing.unit }}</span>
+        <span class="ing-par">Par: {{ ing.par_level }}</span>
+      </td>
+      <td class="td-input">
+        <input
+          type="number"
+          name="qty_{{ ing.id }}"
+          id="qty_{{ ing.id }}"
+          class="qty-input"
+          placeholder="–"
+          min="0"
+          step="0.5"
+          autocomplete="off"
+          inputmode="decimal"
+          onchange="autoFillBuy({{ ing.id }})"
+          oninput="highlightRow({{ ing.id }})"
+        >
+      </td>
+      <td class="td-input">
+        <input
+          type="number"
+          name="buy_{{ ing.id }}"
+          id="buy_{{ ing.id }}"
+          class="buy-input"
+          placeholder="–"
+          min="0"
+          step="0.5"
+          autocomplete="off"
+          inputmode="decimal"
+        >
+      </td>
+      <td class="td-note">
+        <input
+          type="text"
+          name="note_{{ ing.id }}"
+          class="note-input"
+          placeholder="ไม่มี"
+          maxlength="100"
+        >
+      </td>
+    </tr>
+  {% endfor %}
+  {% if ns.current_cat != '' %}</tbody></table></div>{% endif %}
+
+  <div class="submit-section">
+    <div class="field-group">
+      <label for="staff_name">ชื่อพนักงาน <span class="required">*</span></label>
+      <input
+        type="text"
+        name="staff_name"
+        id="staff_name"
+        class="staff-name-input"
+        placeholder="ใส่ชื่อของคุณ"
+        required
+        autocomplete="given-name"
+      >
+    </div>
+    <button type="submit" class="btn-submit" id="submit-btn">
+      <span class="btn-icon">✓</span> ส่งรายงานสต๊อก
+    </button>
+    <p class="submit-hint">ระบบจะส่ง LINE แจ้งเตือนทันทีเมื่อมีสินค้าต่ำกว่าเป้าหมาย</p>
+  </div>
+
+</form>
+
+<div class="legend">
+  <span class="legend-item low">🔴 ต่ำกว่าขั้นต่ำ</span>
+  <span class="legend-item ok">🟢 ปกติ</span>
+  <span class="legend-item empty">⚪ ยังไม่ได้กรอก</span>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+    const el = document.getElementById('live-clock');
+    if (el) el.textContent = `${days[now.getDay()]}  ${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Auto-fill suggested buy when quantity is entered
+  function autoFillBuy(id) {
+    const qtyEl = document.getElementById('qty_' + id);
+    const buyEl = document.getElementById('buy_' + id);
+    const row = document.getElementById('row-' + id);
+    const par = parseFloat(row.dataset.par);
+    const qty = parseFloat(qtyEl.value);
+    if (!isNaN(qty) && !isNaN(par)) {
+      const suggest = Math.max(0, par - qty);
+      buyEl.value = suggest % 1 === 0 ? suggest : suggest.toFixed(1);
+    }
+    highlightRow(id);
+  }
+
+  // Highlight row based on stock level
+  function highlightRow(id) {
+    const qtyEl = document.getElementById('qty_' + id);
+    const row = document.getElementById('row-' + id);
+    const min = parseFloat(row.dataset.min);
+    const qty = parseFloat(qtyEl.value);
+    row.classList.remove('row-low', 'row-ok', 'row-empty');
+    if (qtyEl.value === '') {
+      row.classList.add('row-empty');
+    } else if (!isNaN(qty) && qty <= min) {
+      row.classList.add('row-low');
+    } else {
+      row.classList.add('row-ok');
+    }
+  }
+
+  // Submit confirmation
+  document.getElementById('stock-form').addEventListener('submit', function(e) {
+    const filled = document.querySelectorAll('.qty-input').length;
+    const entered = Array.from(document.querySelectorAll('.qty-input'))
+      .filter(i => i.value !== '').length;
+    if (entered === 0) {
+      e.preventDefault();
+      alert('กรุณาใส่ข้อมูลอย่างน้อย 1 รายการ');
+      return;
+    }
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังส่ง...';
+  });
+</script>
+{% endblock %}

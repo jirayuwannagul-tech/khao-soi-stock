@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#e85d04">
+  <title>{% block title %}Khao Soi Sao Haa{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <span class="navbar-brand">🍜 ข้าวซอยเสาร์ห้า</span>
+    <div class="navbar-links">
+      {% if session.get('is_admin') %}
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_ingredients') }}">วัตถุดิบ</a>
+        <a href="{{ url_for('staff_index') }}">หน้าพนักงาน</a>
+        <a href="{{ url_for('admin_logout') }}" class="btn-logout">ออกจากระบบ</a>
+      {% else %}
+        <a href="{{ url_for('admin_login') }}" class="btn-admin-link">Admin</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

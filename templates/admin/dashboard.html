@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="page-sub">ข้าวซอยเสาร์ห้า – ระบบจัดการสต๊อก</p>
+</div>
+
+<!-- Low Stock Alert Section -->
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">🚨</span>
+    <h2>สินค้าต่ำกว่าขั้นต่ำ</h2>
+    <span class="badge badge-red">{{ low_stock|length }}</span>
+  </div>
+  {% if low_stock %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>วัตถุดิบ</th>
+            <th>คงเหลือ</th>
+            <th>ขั้นต่ำ</th>
+            <th>Par Level</th>
+            <th>ต้องซื้อ</th>
+            <th>รายงานโดย</th>
+            <th>เวลา</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in low_stock %}
+          <tr class="row-alert">
+            <td>
+              <strong>{{ item.name_th }}</strong>
+              <small class="text-gray">{{ item.name_en }}</small>
+            </td>
+            <td class="text-red bold">{{ item.current_qty }} {{ item.unit }}</td>
+            <td>{{ item.min_level }} {{ item.unit }}</td>
+            <td>{{ item.par_level }} {{ item.unit }}</td>
+            <td class="text-orange bold">{{ "%.1f"|format([0, item.par_level - item.current_qty]|max) }} {{ item.unit }}</td>
+            <td>{{ item.created_by }}</td>
+            <td class="text-sm">{{ item.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">✅</span>
+      <p>สต๊อกทุกรายการอยู่ในเกณฑ์ปกติ</p>
+    </div>
+  {% endif %}
+</section>
+
+<!-- Purchase Requests Section -->
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">📋</span>
+    <h2>คำขอจัดซื้อล่าสุด</h2>
+  </div>
+  {% if purchase_requests %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>เวลา</th>
+            <th>รายงานโดย</th>
+            <th>รายการ</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pr in purchase_requests %}
+          <tr>
+            <td>{{ pr.id }}</td>
+            <td class="text-sm">{{ pr.created_at }}</td>
+            <td>{{ pr.created_by }}</td>
+            <td>{{ pr.item_count }} รายการ</td>
+            <td>
+              <span class="status-badge status-{{ pr.status }}">
+                {% if pr.status == 'pending' %}รอดำเนินการ
+                {% elif pr.status == 'sent' %}ส่ง LINE แล้ว
+                {% elif pr.status == 'merged' %}รวมแล้ว
+                {% elif pr.status == 'done' %}จัดซื้อแล้ว
+                {% else %}{{ pr.status }}{% endif %}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('admin_purchase_detail', req_id=pr.id) }}" class="btn-sm btn-blue">ดูรายละเอียด</a>
+              {% if pr.status != 'done' %}
+              <form method="POST" action="{{ url_for('admin_purchase_done', req_id=pr.id) }}" style="display:inline">
+                <button type="submit" class="btn-sm btn-green" onclick="return confirm('ยืนยันว่าจัดซื้อแล้ว?')">✓ จัดซื้อแล้ว</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>ยังไม่มีคำขอจัดซื้อ</p>
+    </div>
+  {% endif %}
+</section>
+
+<!-- Recent Submissions -->
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">🕐</span>
+    <h2>การรายงานล่าสุด</h2>
+  </div>
+  {% if recent_logs %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>เวลา</th>
+            <th>พนักงาน</th>
+            <th>จำนวนรายการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td class="text-sm">{{ log.created_at }}</td>
+            <td>{{ log.created_by }}</td>
+            <td>{{ log.items_count }} รายการ</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>ยังไม่มีการรายงาน</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

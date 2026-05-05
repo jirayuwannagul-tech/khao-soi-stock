@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}จัดการวัตถุดิบ – Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">จัดการวัตถุดิบ</h1>
+  <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Dashboard</a>
+</div>
+
+<!-- Add Ingredient Form -->
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">➕</span>
+    <h2>เพิ่มวัตถุดิบใหม่</h2>
+  </div>
+  <form method="POST" action="{{ url_for('admin_ingredient_add') }}" class="ing-form">
+    <div class="form-grid">
+      <div class="field-group">
+        <label>ชื่อภาษาไทย <span class="required">*</span></label>
+        <input type="text" name="name_th" class="form-input" placeholder="เช่น หมู" required>
+      </div>
+      <div class="field-group">
+        <label>ชื่อภาษาอังกฤษ <span class="required">*</span></label>
+        <input type="text" name="name_en" class="form-input" placeholder="e.g. Pork" required>
+      </div>
+      <div class="field-group">
+        <label>หมวดหมู่ <span class="required">*</span></label>
+        <select name="category_id" class="form-input" required>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name_th }} ({{ cat.name_en }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field-group">
+        <label>หน่วย <span class="required">*</span></label>
+        <select name="unit" class="form-input">
+          <option value="kg">kg</option>
+          <option value="g">g</option>
+          <option value="ลิตร">ลิตร</option>
+          <option value="ชิ้น">ชิ้น</option>
+          <option value="กล่อง">กล่อง</option>
+          <option value="ถุง">ถุง</option>
+          <option value="ขวด">ขวด</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Par Level (เป้าหมายสต๊อก) <span class="required">*</span></label>
+        <input type="number" name="par_level" class="form-input" placeholder="50" min="0" step="0.5" required>
+      </div>
+      <div class="field-group">
+        <label>ขั้นต่ำ (แจ้งเตือน) <span class="required">*</span></label>
+        <input type="number" name="min_level" class="form-input" placeholder="20" min="0" step="0.5" required>
+      </div>
+    </div>
+    <button type="submit" class="btn-submit btn-compact">+ เพิ่มวัตถุดิบ</button>
+  </form>
+</section>
+
+<!-- Ingredient List -->
+<section class="card">
+  <div class="card-header">
+    <span class="card-icon">📦</span>
+    <h2>รายการวัตถุดิบ ({{ ingredients|length }} รายการ)</h2>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>วัตถุดิบ</th>
+          <th>หมวด</th>
+          <th>หน่วย</th>
+          <th>Par Level</th>
+          <th>ขั้นต่ำ</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ing in ingredients %}
+        <tr id="row-edit-{{ ing.id }}">
+          <td>
+            <strong>{{ ing.name_th }}</strong><br>
+            <small class="text-gray">{{ ing.name_en }}</small>
+          </td>
+          <td>{{ ing.cat_th }}</td>
+          <td>{{ ing.unit }}</td>
+          <td>{{ ing.par_level }}</td>
+          <td>{{ ing.min_level }}</td>
+          <td class="td-actions">
+            <button class="btn-sm btn-blue" onclick="openEditModal({{ ing.id }}, '{{ ing.name_th }}', '{{ ing.name_en }}', {{ ing.category_id }}, '{{ ing.unit }}', {{ ing.par_level }}, {{ ing.min_level }})">แก้ไข</button>
+            <form method="POST" action="{{ url_for('admin_ingredient_delete', ing_id=ing.id) }}" style="display:inline">
+              <button type="submit" class="btn-sm btn-red" onclick="return confirm('ลบ {{ ing.name_th }}?')">ลบ</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>แก้ไขวัตถุดิบ</h3>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <form method="POST" id="edit-form" class="ing-form">
+      <input type="hidden" name="_method" value="edit">
+      <div class="form-grid">
+        <div class="field-group">
+          <label>ชื่อภาษาไทย</label>
+          <input type="text" name="name_th" id="edit-name-th" class="form-input" required>
+        </div>
+        <div class="field-group">
+          <label>ชื่อภาษาอังกฤษ</label>
+          <input type="text" name="name_en" id="edit-name-en" class="form-input" required>
+        </div>
+        <div class="field-group">
+          <label>หมวดหมู่</label>
+          <select name="category_id" id="edit-category" class="form-input">
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name_th }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field-group">
+          <label>หน่วย</label>
+          <select name="unit" id="edit-unit" class="form-input">
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="ลิตร">ลิตร</option>
+            <option value="ชิ้น">ชิ้น</option>
+            <option value="กล่อง">กล่อง</option>
+            <option value="ถุง">ถุง</option>
+            <option value="ขวด">ขวด</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Par Level</label>
+          <input type="number" name="par_level" id="edit-par" class="form-input" min="0" step="0.5" required>
+        </div>
+        <div class="field-group">
+          <label>ขั้นต่ำ</label>
+          <input type="number" name="min_level" id="edit-min" class="form-input" min="0" step="0.5" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
+        <button type="submit" class="btn-submit btn-compact">บันทึก</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openEditModal(id, nameTh, nameEn, catId, unit, par, min) {
+  document.getElementById('edit-name-th').value = nameTh;
+  document.getElementById('edit-name-en').value = nameEn;
+  document.getElementById('edit-category').value = catId;
+  document.getElementById('edit-unit').value = unit;
+  document.getElementById('edit-par').value = par;
+  document.getElementById('edit-min').value = min;
+  document.getElementById('edit-form').action = '/admin/ingredients/' + id + '/edit';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('edit-modal')) closeEditModal();
+}
+</script>
+{% endblock %}
